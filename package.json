@@ -8,11 +8,12 @@
     "dev:frontend": "cd frontend && npm start",
     "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "build": "cd frontend && npm run build",
-    "start": "cd backend && npm start"
+    "start": "cd backend && npm start",
+    "vercel-build": "cd frontend && npm ci && npm run build"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/library-management-system.git"
+    "url": "https://github.com/luyunchen/lms.git"
   },
   "keywords": [
     "library",
@@ -20,11 +21,15 @@
     "react",
     "nodejs",
     "sqlite",
-    "fullstack"
+    "fullstack",
+    "vercel"
   ],
-  "author": "Your Name",
+  "author": "Luyun Chen",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^7.6.0"
+  },
+  "engines": {
+    "node": ">=14.x"
   }
 }

@@ -10,22 +10,6 @@ const TelemetryDashboard = () => {
   const [timeRange, setTimeRange] = useState('7d');
   const [selectedCategory, setSelectedCategory] = useState('');
 
-  useEffect(() => {
-    // Track dashboard view
-    telemetryService.trackEvent('page_view', { page: 'telemetry_dashboard' });
-    
-    fetchDashboardData();
-    fetchEvents();
-
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(() => {
-      fetchDashboardData();
-      fetchEvents();
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [timeRange, selectedCategory, fetchDashboardData, fetchEvents]);
-
   const fetchDashboardData = useCallback(async () => {
     try {
       const response = await api.get(`/api/telemetry/dashboard?timeRange=${timeRange}`);
@@ -54,6 +38,22 @@ const TelemetryDashboard = () => {
       console.error('Error fetching events:', error);
     }
   }, [timeRange, selectedCategory]);
+
+  useEffect(() => {
+    // Track dashboard view
+    telemetryService.trackEvent('page_view', { page: 'telemetry_dashboard' });
+    
+    fetchDashboardData();
+    fetchEvents();
+
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(() => {
+      fetchDashboardData();
+      fetchEvents();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [timeRange, selectedCategory, fetchDashboardData, fetchEvents]);
 
   const formatNumber = (num) => {
     return new Intl.NumberFormat().format(num);

@@ -18,10 +18,6 @@ const BookDetails = () => {
   const [checkinModal, setCheckinModal] = useState({ isOpen: false });
   const [deleteModal, setDeleteModal] = useState({ isOpen: false });
 
-  useEffect(() => {
-    fetchBook();
-  }, [id, fetchBook]);
-
   const fetchBook = useCallback(async () => {
     try {
       const response = await axios.get(`/api/books/${id}`);
@@ -34,6 +30,10 @@ const BookDetails = () => {
       setLoading(false);
     }
   }, [id]);
+
+  useEffect(() => {
+    fetchBook();
+  }, [id, fetchBook]);
 
   const showMessage = (text, type) => {
     setMessage({ text, type });

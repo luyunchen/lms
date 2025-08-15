@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import BookCard from '../components/BookCard';
 import CheckoutModal from '../components/CheckoutModal';
@@ -31,17 +31,17 @@ const Books = () => {
 
   useEffect(() => {
     fetchBooks();
-  }, []);
+  }, [fetchBooks]);
 
   useEffect(() => {
     filterBooks();
-  }, [books, searchTerm, statusFilter, genreFilter]);
+  }, [books, searchTerm, statusFilter, genreFilter, filterBooks]);
 
   useEffect(() => {
     generateSuggestions();
-  }, [books]);
+  }, [books, generateSuggestions]);
 
-  const fetchBooks = async () => {
+  const fetchBooks = useCallback(async () => {
     try {
       const response = await axios.get('/api/books');
       setBooks(response.data);
@@ -56,17 +56,17 @@ const Books = () => {
       showMessage('Error loading books', 'error');
       setLoading(false);
     }
-  };
+  }, []);
 
-  const generateSuggestions = () => {
+  const generateSuggestions = useCallback(() => {
     const titles = [...new Set(books.map(book => book.title))].sort();
     const authors = [...new Set(books.map(book => book.author))].sort();
     const genres = [...new Set(books.map(book => book.genre).filter(Boolean))].sort();
     
     setSuggestions({ titles, authors, genres });
-  };
+  }, [books]);
 
-  const filterBooks = () => {
+  const filterBooks = useCallback(() => {
     let filtered = books;
 
     // Enhanced search with fuzzy matching
@@ -105,7 +105,7 @@ const Books = () => {
     }
 
     setFilteredBooks(filtered);
-  };
+  }, [books, searchTerm, statusFilter, genreFilter]);
 
   // Simple fuzzy matching for common typos
   const fuzzyMatch = (text, query) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 import TelemetryManager from '../components/TelemetryManager';
 import { telemetryService } from '../services/telemetry';
@@ -9,7 +9,6 @@ const TelemetryDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('7d');
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [refreshInterval, setRefreshInterval] = useState(null);
 
   useEffect(() => {
     // Track dashboard view
@@ -23,12 +22,11 @@ const TelemetryDashboard = () => {
       fetchDashboardData();
       fetchEvents();
     }, 30000);
-    setRefreshInterval(interval);
 
     return () => clearInterval(interval);
-  }, [timeRange, selectedCategory]);
+  }, [timeRange, selectedCategory, fetchDashboardData, fetchEvents]);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       const response = await api.get(`/api/telemetry/dashboard?timeRange=${timeRange}`);
       setDashboardData(response.data);
@@ -37,9 +35,9 @@ const TelemetryDashboard = () => {
       console.error('Error fetching dashboard data:', error);
       setLoading(false);
     }
-  };
+  }, [timeRange]);
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     try {
       const params = new URLSearchParams({
         timeRange,
@@ -55,7 +53,7 @@ const TelemetryDashboard = () => {
     } catch (error) {
       console.error('Error fetching events:', error);
     }
-  };
+  }, [timeRange, selectedCategory]);
 
   const formatNumber = (num) => {
     return new Intl.NumberFormat().format(num);

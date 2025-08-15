@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 const AutocompleteSearch = ({ 
   value, 
@@ -20,7 +20,7 @@ const AutocompleteSearch = ({
       setFilteredSuggestions([]);
       setIsOpen(false);
     }
-  }, [value, suggestions]);
+  }, [value, suggestions, generateFilteredSuggestions]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -33,7 +33,7 @@ const AutocompleteSearch = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const generateFilteredSuggestions = () => {
+  const generateFilteredSuggestions = useCallback(() => {
     const query = value.toLowerCase();
     const allSuggestions = [];
 
@@ -105,7 +105,7 @@ const AutocompleteSearch = ({
     setFilteredSuggestions(combined);
     setIsOpen(combined.length > 0);
     setHighlightedIndex(-1);
-  };
+  }, [value, suggestions]);
 
   const fuzzyMatch = (text, query) => {
     if (query.length < 3) return false;
@@ -177,6 +177,9 @@ const AutocompleteSearch = ({
         setIsOpen(false);
         setHighlightedIndex(-1);
         inputRef.current.blur();
+        break;
+      default:
+        // Handle other keys
         break;
     }
   };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import CheckoutModal from '../components/CheckoutModal';
@@ -20,9 +20,9 @@ const BookDetails = () => {
 
   useEffect(() => {
     fetchBook();
-  }, [id]);
+  }, [id, fetchBook]);
 
-  const fetchBook = async () => {
+  const fetchBook = useCallback(async () => {
     try {
       const response = await axios.get(`/api/books/${id}`);
       setBook(response.data);
@@ -33,7 +33,7 @@ const BookDetails = () => {
       showMessage('Book not found', 'error');
       setLoading(false);
     }
-  };
+  }, [id]);
 
   const showMessage = (text, type) => {
     setMessage({ text, type });

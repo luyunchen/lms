@@ -1,0 +1,52 @@
+sessionId,eventType,eventCategory,eventName,userAgent,pageUrl,payload_message,payload_stack,payload_filename,payload_lineno,payload_colno,duration,timestamp,payload_linkText,payload_linkHref,payload_isExternal,payload_url,payload_userAgent,payload_viewport,payload_duration
+"session_1755225109049_mpeiv7icw","exception","error","javascript_error","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","http://localhost:3000/","_services_telemetry__WEBPACK_IMPORTED_MODULE_3__.telemetryService.trackEvent is not a function","TypeError: _services_telemetry__WEBPACK_IMPORTED_MODULE_3__.telemetryService.trackEvent is not a function
+    at http://localhost:3000/static/js/bundle.js:54199:71
+    at commitHookEffectListMount (http://localhost:3000/static/js/bundle.js:32617:30)
+    at commitPassiveMountOnFiber (http://localhost:3000/static/js/bundle.js:34110:17)
+    at commitPassiveMountEffects_complete (http://localhost:3000/static/js/bundle.js:34082:13)
+    at commitPassiveMountEffects_begin (http://localhost:3000/static/js/bundle.js:34072:11)
+    at commitPassiveMountEffects (http://localhost:3000/static/js/bundle.js:34062:7)
+    at flushPassiveEffectsImpl (http://localhost:3000/static/js/bundle.js:35945:7)
+    at flushPassiveEffects (http://localhost:3000/static/js/bundle.js:35898:18)
+    at http://localhost:3000/static/js/bundle.js:35713:13
+    at workLoop (http://localhost:3000/static/js/bundle.js:45988:38)","http://localhost:3000/static/js/bundle.js","32356","11","null","2025-08-15T02:31:49.296Z","","","","","","",""
+"session_1755225109049_mpeiv7icw","click","interaction","link_click","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","http://localhost:3000/","","","","","","null","2025-08-15T02:31:49.303Z","","blob:http://localhost:3000/0c3357cc-0894-4469-8819-2c1b9336589b","true","","","",""
+"session_1755225109049_mpeiv7icw","exception","error","javascript_error","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","http://localhost:3000/","_services_telemetry__WEBPACK_IMPORTED_MODULE_3__.telemetryService.trackEvent is not a function","TypeError: _services_telemetry__WEBPACK_IMPORTED_MODULE_3__.telemetryService.trackEvent is not a function
+    at http://localhost:3000/static/js/bundle.js:54199:71
+    at commitHookEffectListMount (http://localhost:3000/static/js/bundle.js:32617:30)
+    at invokePassiveEffectMountInDEV (http://localhost:3000/static/js/bundle.js:34306:17)
+    at invokeEffectsInDev (http://localhost:3000/static/js/bundle.js:36203:15)
+    at commitDoubleInvokeEffectsInDEV (http://localhost:3000/static/js/bundle.js:36186:11)
+    at flushPassiveEffectsImpl (http://localhost:3000/static/js/bundle.js:35959:9)
+    at flushPassiveEffects (http://localhost:3000/static/js/bundle.js:35898:18)
+    at http://localhost:3000/static/js/bundle.js:35713:13
+    at workLoop (http://localhost:3000/static/js/bundle.js:45988:38)
+    at flushWork (http://localhost:3000/static/js/bundle.js:45966:18)","http://localhost:3000/static/js/bundle.js","32356","11","null","2025-08-15T02:31:49.304Z","","","","","","",""
+"session_1755225109049_mpeiv7icw","exception","error","javascript_error","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","http://localhost:3000/","_services_telemetry__WEBPACK_IMPORTED_MODULE_3__.telemetryService.trackEvent is not a function","TypeError: _services_telemetry__WEBPACK_IMPORTED_MODULE_3__.telemetryService.trackEvent is not a function
+    at http://localhost:3000/static/js/bundle.js:54199:71
+    at commitHookEffectListMount (http://localhost:3000/static/js/bundle.js:32617:30)
+    at commitPassiveMountOnFiber (http://localhost:3000/static/js/bundle.js:34110:17)
+    at commitPassiveMountEffects_complete (http://localhost:3000/static/js/bundle.js:34082:13)
+    at commitPassiveMountEffects_begin (http://localhost:3000/static/js/bundle.js:34072:11)
+    at commitPassiveMountEffects (http://localhost:3000/static/js/bundle.js:34062:7)
+    at flushPassiveEffectsImpl (http://localhost:3000/static/js/bundle.js:35945:7)
+    at flushPassiveEffects (http://localhost:3000/static/js/bundle.js:35898:18)
+    at http://localhost:3000/static/js/bundle.js:35713:13
+    at workLoop (http://localhost:3000/static/js/bundle.js:45988:38)","http://localhost:3000/static/js/bundle.js","23135","11","null","2025-08-15T02:31:49.307Z","","","","","","",""
+"session_1755225109049_mpeiv7icw","session","navigation","session_start","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","http://localhost:3000/","","","","","","null","2025-08-15T02:31:49.316Z","","","","http://localhost:3000/","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","[object Object]",""
+"session_1755225109049_mpeiv7icw","click","interaction","link_click","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","http://localhost:3000/","","","","","","null","2025-08-15T02:31:49.324Z","","blob:http://localhost:3000/1dc0b2db-b703-495d-afc8-f6ae72bb659b","true","","","",""
+"session_1755225109049_mpeiv7icw","visibility","navigation","page_visible","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","http://localhost:3000/","","","","","","null","2025-08-15T02:31:53.700Z","","","","","","",""
+"session_1755225109049_mpeiv7icw","session","navigation","session_end","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","http://localhost:3000/","","","","","","null","2025-08-15T02:32:07.679Z","","","","","","","18630"
+"session_1755225109049_mpeiv7icw","click","interaction","link_click","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","http://localhost:3000/","","","","","","null","2025-08-15T02:32:07.683Z","","blob:http://localhost:3000/251904c4-a1b5-4c36-b585-770ea59afee3","true","","","",""
+"session_1755225109049_mpeiv7icw","visibility","navigation","page_hidden","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","http://localhost:3000/","","","","","","null","2025-08-15T02:32:07.999Z","","","","","","",""
+"session_1755225128036_h9z29c73l","exception","error","javascript_error","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","http://localhost:3000/","_services_telemetry__WEBPACK_IMPORTED_MODULE_3__.telemetryService.trackEvent is not a function","TypeError: _services_telemetry__WEBPACK_IMPORTED_MODULE_3__.telemetryService.trackEvent is not a function
+    at http://localhost:3000/static/js/bundle.js:54199:71
+    at commitHookEffectListMount (http://localhost:3000/static/js/bundle.js:32617:30)
+    at commitPassiveMountOnFiber (http://localhost:3000/static/js/bundle.js:34110:17)
+    at commitPassiveMountEffects_complete (http://localhost:3000/static/js/bundle.js:34082:13)
+    at commitPassiveMountEffects_begin (http://localhost:3000/static/js/bundle.js:34072:11)
+    at commitPassiveMountEffects (http://localhost:3000/static/js/bundle.js:34062:7)
+    at flushPassiveEffectsImpl (http://localhost:3000/static/js/bundle.js:35945:7)
+    at flushPassiveEffects (http://localhost:3000/static/js/bundle.js:35898:18)
+    at http://localhost:3000/static/js/bundle.js:35713:13
+    at workLoop (http://localhost:3000/static/js/bundle.js:45988:38)","http://localhost:3000/static/js/bundle.js","32356","11","null","2025-08-15T02:32:08.068Z","","","","","","",""

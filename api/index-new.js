@@ -1,45 +1,14 @@
-// Vercel serverless function handler
+// Vercel serverless function handler with database support
+const { 
+  getAllBooks, 
+  getBookById, 
+  updateBook, 
+  addBook, 
+  getAllActivity, 
+  addActivity 
+} = require('./database');
 
-// In-memory data store (resets on cold starts)
-let books = [
-  { id: 1, title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', status: 'available', genre: 'Classic Literature', year: 1925, isbn: '9780743273565' },
-  { id: 2, title: 'To Kill a Mockingbird', author: 'Harper Lee', status: 'available', genre: 'Fiction', year: 1960, isbn: '9780061120084' },
-  { id: 3, title: '1984', author: 'George Orwell', status: 'borrowed', genre: 'Dystopian Fiction', year: 1949, borrowed_by: 'Demo User', due_date: '2025-08-10', isbn: '9780451524935' }, // Made this overdue
-  { id: 4, title: 'Pride and Prejudice', author: 'Jane Austen', status: 'available', genre: 'Romance', year: 1813, isbn: '9780141439518' },
-  { id: 5, title: 'The Catcher in the Rye', author: 'J.D. Salinger', status: 'borrowed', genre: 'Fiction', year: 1951, borrowed_by: 'Jane Smith', due_date: '2025-08-25', isbn: '9780316769174' }
-];
-
-let activity = [
-  { 
-    id: 1, 
-    action: 'checked_out', 
-    book_title: '1984', 
-    book_id: 3,
-    borrower_name: 'Demo User',
-    timestamp: '2025-08-01T10:00:00Z',
-    notes: 'Demo checkout (now overdue)'
-  },
-  { 
-    id: 2, 
-    action: 'checked_out', 
-    book_title: 'The Catcher in the Rye', 
-    book_id: 5,
-    borrower_name: 'Jane Smith',
-    timestamp: '2025-08-11T14:30:00Z',
-    notes: 'Recent checkout'
-  },
-  { 
-    id: 3, 
-    action: 'returned', 
-    book_title: 'Pride and Prejudice', 
-    book_id: 4,
-    borrower_name: 'John Doe',
-    timestamp: '2025-08-14T09:15:00Z',
-    notes: 'Returned on time'
-  }
-];
-
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
   console.log(`${req.method} ${req.url}`);
   
   // Set CORS headers for all responses
@@ -71,17 +40,16 @@ module.exports = (req, res) => {
       return;
     }
 
-    // Dashboard stats (both endpoints for compatibility)
-    if (url === '/api/dashboard' || url === '/api/stats') {
+    // Dashboard stats
+    if (url === '/api/dashboard') {
+      const books = await getAllBooks();
       const availableBooks = books.filter(b => b.status === 'available').length;
       const borrowedBooks = books.filter(b => b.status === 'borrowed').length;
       const overdueBooks = books.filter(b => 
         b.status === 'borrowed' && b.due_date && new Date(b.due_date) < new Date()
       ).length;
-      const totalBooks = books.length;
 
       res.status(200).json({
-        totalBooks,
         availableBooks,
         borrowedBooks,
         overdueBooks
@@ -91,6 +59,7 @@ module.exports = (req, res) => {
 
     // All books endpoint
     if (url === '/api/books' && req.method === 'GET') {
+      const books = await getAllBooks();
       res.status(200).json(books);
       return;
     }
@@ -98,15 +67,13 @@ module.exports = (req, res) => {
     // Add new book
     if (url === '/api/books' && req.method === 'POST') {
       const bookData = JSON.parse(req.body || '{}');
-      const newBook = {
-        id: Math.max(...books.map(b => b.id)) + 1,
+      const newBook = await addBook({
         ...bookData,
         status: 'available',
         borrowed_by: null,
         due_date: null,
         checkout_date: null
-      };
-      books.push(newBook);
+      });
       
       res.status(201).json(newBook);
       return;
@@ -117,7 +84,7 @@ module.exports = (req, res) => {
       const bookId = parseInt(url.match(/\/api\/books\/(\d+)$/)[1]);
       console.log('Looking for book with ID:', bookId, typeof bookId);
       
-      const book = books.find(b => b.id === bookId);
+      const book = await getBookById(bookId);
       console.log('Found book:', book ? book.title : 'Not found');
       
       if (!book) {
@@ -131,18 +98,17 @@ module.exports = (req, res) => {
 
     // Overdue books
     if (url === '/api/books/overdue') {
+      const books = await getAllBooks();
       const overdueBooks = books.filter(b => 
         b.status === 'borrowed' && b.due_date && new Date(b.due_date) < new Date()
-      ).map(book => ({
-        ...book,
-        borrower_name: book.borrowed_by // Map borrowed_by to borrower_name for frontend compatibility
-      }));
+      );
       res.status(200).json(overdueBooks);
       return;
     }
 
     // Activity endpoint
     if (url === '/api/activity') {
+      const activity = await getAllActivity();
       res.status(200).json(activity);
       return;
     }
@@ -156,7 +122,7 @@ module.exports = (req, res) => {
         return;
       }
 
-      const book = books.find(b => b.id === parseInt(bookId));
+      const book = await getBookById(bookId);
       if (!book) {
         res.status(404).json({ error: 'Book not found' });
         return;
@@ -172,26 +138,26 @@ module.exports = (req, res) => {
       dueDate.setDate(dueDate.getDate() + 14);
 
       // Update book status
-      book.status = 'borrowed';
-      book.borrowed_by = borrowerName;
-      book.due_date = dueDate.toISOString().split('T')[0];
-      book.checkout_date = new Date().toISOString().split('T')[0];
+      const updatedBook = await updateBook(bookId, {
+        status: 'borrowed',
+        borrowed_by: borrowerName,
+        due_date: dueDate.toISOString().split('T')[0],
+        checkout_date: new Date().toISOString().split('T')[0]
+      });
 
       // Add activity record
-      const newActivity = {
-        id: Math.max(...activity.map(a => a.id), 0) + 1,
+      await addActivity({
         action: 'checked_out',
         book_title: book.title,
-        book_id: parseInt(bookId),
+        book_id: bookId,
         borrower_name: borrowerName,
         timestamp: new Date().toISOString(),
         notes: `Checked out to ${borrowerName}`
-      };
-      activity.unshift(newActivity);
+      });
 
       res.status(200).json({ 
         message: 'Book checked out successfully', 
-        book: book 
+        book: updatedBook 
       });
       return;
     }
@@ -205,7 +171,7 @@ module.exports = (req, res) => {
         return;
       }
 
-      const book = books.find(b => b.id === parseInt(bookId));
+      const book = await getBookById(bookId);
       if (!book) {
         res.status(404).json({ error: 'Book not found' });
         return;
@@ -219,26 +185,26 @@ module.exports = (req, res) => {
       const borrowerName = book.borrowed_by;
 
       // Update book status
-      book.status = 'available';
-      book.borrowed_by = null;
-      book.due_date = null;
-      book.checkout_date = null;
+      const updatedBook = await updateBook(bookId, {
+        status: 'available',
+        borrowed_by: null,
+        due_date: null,
+        checkout_date: null
+      });
 
       // Add activity record
-      const newActivity = {
-        id: Math.max(...activity.map(a => a.id), 0) + 1,
+      await addActivity({
         action: 'returned',
         book_title: book.title,
-        book_id: parseInt(bookId),
+        book_id: bookId,
         borrower_name: borrowerName,
         timestamp: new Date().toISOString(),
         notes: `Returned by ${borrowerName}`
-      };
-      activity.unshift(newActivity);
+      });
 
       res.status(200).json({ 
         message: 'Book returned successfully', 
-        book: book 
+        book: updatedBook 
       });
       return;
     }

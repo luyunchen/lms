@@ -4,7 +4,7 @@ import BookCard from '../components/BookCard';
 import CheckoutModal from '../components/CheckoutModal';
 import ConfirmModal from '../components/ConfirmModal';
 import AutocompleteSearch from '../components/AutocompleteSearch';
-import { telemetryService } from '../services/telemetry';
+// import { telemetryService } from '../services/telemetry';
 
 const Books = () => {
   const [books, setBooks] = useState([]);
@@ -165,20 +165,20 @@ const Books = () => {
       await axios.post(`/api/books/${bookId}/checkout`, borrowerData);
       
       // Track successful checkout
-      telemetryService.trackEvent('book_checkout', {
-        bookId,
-        borrowerName: borrowerData.name
-      });
+      // telemetryService.trackEvent('book_checkout', {
+      //   bookId,
+      //   borrowerName: borrowerData.name
+      // });
       
       showMessage('Book checked out successfully!', 'success');
       setCheckoutModal({ isOpen: false, book: null });
       fetchBooks(); // Refresh the books list
     } catch (error) {
       console.error('Error checking out book:', error);
-      telemetryService.trackEvent('checkout_error', {
-        bookId,
-        error: error.response?.data?.error || error.message
-      });
+      // telemetryService.trackEvent('checkout_error', {
+      //   bookId,
+      //   error: error.response?.data?.error || error.message
+      // });
       showMessage(error.response?.data?.error || 'Error checking out book', 'error');
     }
   };
@@ -188,20 +188,20 @@ const Books = () => {
       await axios.post(`/api/books/${checkinModal.book.id}/checkin`);
       
       // Track successful checkin
-      telemetryService.trackEvent('book_checkin', {
-        bookId: checkinModal.book.id,
-        bookTitle: checkinModal.book.title
-      });
+      // telemetryService.trackEvent('book_checkin', {
+      //   bookId: checkinModal.book.id,
+      //   bookTitle: checkinModal.book.title
+      // });
       
       showMessage('Book checked in successfully!', 'success');
       setCheckinModal({ isOpen: false, book: null });
       fetchBooks(); // Refresh the books list
     } catch (error) {
       console.error('Error checking in book:', error);
-      telemetryService.trackEvent('checkin_error', {
-        bookId: checkinModal.book.id,
-        error: error.response?.data?.error || error.message
-      });
+      // telemetryService.trackEvent('checkin_error', {
+      //   bookId: checkinModal.book.id,
+      //   error: error.response?.data?.error || error.message
+      // });
       showMessage(error.response?.data?.error || 'Error checking in book', 'error');
     }
   };
@@ -214,11 +214,11 @@ const Books = () => {
 
   const handleSearchSelect = (selectedValue, type) => {
     // Track autocomplete selection
-    telemetryService.trackEvent('autocomplete_selection', {
-      selectedValue,
-      type,
-      searchTerm
-    });
+    // telemetryService.trackEvent('autocomplete_selection', {
+    //   selectedValue,
+    //   type,
+    //   searchTerm
+    // });
     
     if (type === 'title' || type === 'author') {
       setSearchTerm(selectedValue);
@@ -267,14 +267,14 @@ const Books = () => {
           onChange={(value) => {
             setSearchTerm(value);
             // Track search with debouncing
-            if (value.length >= 3) {
-              setTimeout(() => {
-                telemetryService.trackEvent('search_query', {
-                  query: value,
-                  resultsCount: filteredBooks.length
-                });
-              }, 1000);
-            }
+            // if (value.length >= 3) {
+            //   setTimeout(() => {
+            //     telemetryService.trackEvent('search_query', {
+            //       query: value,
+            //       resultsCount: filteredBooks.length
+            //     });
+            //   }, 1000);
+            // }
           }}
           onSelect={handleSearchSelect}
           suggestions={suggestions}

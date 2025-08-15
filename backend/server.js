@@ -14,8 +14,21 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Database setup
-const dbPath = path.join(__dirname, 'library.db');
-const db = new sqlite3.Database(dbPath);
+let db;
+try {
+  // In serverless environments, try to use in-memory database
+  if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+    console.log('Using in-memory SQLite database for serverless deployment');
+    db = new sqlite3.Database(':memory:');
+  } else {
+    const dbPath = path.join(__dirname, 'library.db');
+    db = new sqlite3.Database(dbPath);
+  }
+} catch (error) {
+  console.error('Database initialization error:', error);
+  // Fallback to in-memory database
+  db = new sqlite3.Database(':memory:');
+}
 
 // Initialize database tables
 db.serialize(() => {
@@ -98,6 +111,42 @@ db.serialize(() => {
     session_id TEXT,
     additional_data TEXT
   )`);
+
+  // Add sample data for production environment and development
+  if (process.env.VERCEL || process.env.NODE_ENV === 'production' || true) {
+    console.log('Adding sample data for demo...');
+    
+    // Sample books
+    const sampleBooks = [
+      { id: uuidv4(), title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', genre: 'Classic Literature', year: 1925, status: 'available' },
+      { id: uuidv4(), title: 'To Kill a Mockingbird', author: 'Harper Lee', genre: 'Fiction', year: 1960, status: 'available' },
+      { id: uuidv4(), title: '1984', author: 'George Orwell', genre: 'Dystopian Fiction', year: 1949, status: 'borrowed', borrower_id: 'demo-borrower-1', borrowed_date: '2025-08-10', due_date: '2025-08-24' },
+      { id: uuidv4(), title: 'Pride and Prejudice', author: 'Jane Austen', genre: 'Romance', year: 1813, status: 'available' },
+      { id: uuidv4(), title: 'The Catcher in the Rye', author: 'J.D. Salinger', genre: 'Fiction', year: 1951, status: 'available' }
+    ];
+
+    sampleBooks.forEach(book => {
+      db.run(`INSERT OR IGNORE INTO books (id, title, author, genre, year, status, borrower_id, borrowed_date, due_date, created_at) 
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`, 
+              [book.id, book.title, book.author, book.genre, book.year, book.status, book.borrower_id || null, book.borrowed_date || null, book.due_date || null],
+              function(err) {
+                if (err) {
+                  console.error('Error inserting book:', book.title, err.message);
+                } else {
+                  console.log('Inserted book:', book.title);
+                }
+              });
+    });
+
+    // Sample borrower
+    db.run(`INSERT OR IGNORE INTO borrowers (id, name, email, created_at) 
+            VALUES ('demo-borrower-1', 'Demo User', 'demo@example.com', datetime('now'))`);
+
+    // Sample activity
+    db.run(`INSERT OR IGNORE INTO activity_log (id, book_id, borrower_id, action, timestamp, notes) 
+            VALUES (?, ?, 'demo-borrower-1', 'borrowed', datetime('now'), 'Demo checkout')`, 
+            [uuidv4(), sampleBooks[2].id]);
+  }
 });
 
 // Helper function to log activity
@@ -802,9 +851,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// Start server (only in non-serverless environments)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
 
 module.exports = app;

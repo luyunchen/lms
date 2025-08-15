@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
@@ -6,29 +6,37 @@ import Books from './pages/Books';
 import AddBook from './pages/AddBook';
 import BookDetails from './pages/BookDetails';
 import Activity from './pages/Activity';
-import TelemetryDashboard from './pages/TelemetryDashboard';
-import { telemetryService } from './services/telemetry';
+// import TelemetryDashboard from './pages/TelemetryDashboard';
+// import { telemetryService } from './services/telemetry';
 
 function App() {
-  useEffect(() => {
-    // Initialize telemetry on app start
-    telemetryService.init();
-    
-    // Track app initialization
-    telemetryService.trackEvent('app_initialized', {
-      timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent,
-      viewport: {
-        width: window.innerWidth,
-        height: window.innerHeight
-      }
-    });
+  // useEffect(() => {
+  //   try {
+  //     // Initialize telemetry on app start
+  //     telemetryService.init();
+  //     
+  //     // Track app initialization
+  //     telemetryService.trackEvent('app_initialized', {
+  //       timestamp: new Date().toISOString(),
+  //       userAgent: navigator.userAgent,
+  //       viewport: {
+  //         width: window.innerWidth,
+  //         height: window.innerHeight
+  //       }
+  //     });
+  //   } catch (error) {
+  //     console.error('Telemetry initialization error:', error);
+  //   }
 
-    return () => {
-      // Clean up telemetry on app unmount
-      telemetryService.cleanup();
-    };
-  }, []);
+  //   return () => {
+  //     try {
+  //       // Clean up telemetry on app unmount
+  //       telemetryService.cleanup();
+  //     } catch (error) {
+  //       console.error('Telemetry cleanup error:', error);
+  //     }
+  //   };
+  // }, []);
   return (
     <Router>
       <div className="app">
@@ -41,7 +49,7 @@ function App() {
               <Route path="/books/add" element={<AddBook />} />
               <Route path="/books/:id" element={<BookDetails />} />
               <Route path="/activity" element={<Activity />} />
-              <Route path="/telemetry" element={<TelemetryDashboard />} />
+              {/* <Route path="/telemetry" element={<TelemetryDashboard />} /> */}
             </Routes>
           </div>
         </main>

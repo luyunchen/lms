@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { telemetryService } from '../services/telemetry';
+// import { telemetryService } from '../services/telemetry';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -16,7 +16,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     // Track dashboard view
-    telemetryService.trackEvent('page_view', { page: 'dashboard' });
+    // telemetryService.trackEvent('page_view', { page: 'dashboard' });
     fetchDashboardData();
   }, []);
 
@@ -34,6 +34,15 @@ const Dashboard = () => {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      // Set default values so the dashboard still renders
+      setStats({
+        totalBooks: 0,
+        availableBooks: 0,
+        borrowedBooks: 0,
+        overdueBooks: 0
+      });
+      setOverdueBooks([]);
+      setRecentActivity([]);
       setLoading(false);
     }
   };

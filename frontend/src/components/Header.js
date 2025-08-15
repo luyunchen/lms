@@ -36,12 +36,12 @@ const Header = () => {
             >
               Activity
             </Link>
-            <Link 
+            {/* <Link 
               to="/telemetry" 
               className={`nav-link ${location.pathname === '/telemetry' ? 'active' : ''}`}
             >
               Analytics
-            </Link>
+            </Link> */}
           </nav>
         </div>
       </div>

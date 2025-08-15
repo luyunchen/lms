@@ -5,36 +5,64 @@ class TelemetryService {
     this.sessionId = null;
     this.isEnabled = true;
     this.eventQueue = [];
+    this.sessionData = [];
     this.batchSize = 10;
     this.flushInterval = 5000; // 5 seconds
     this.startTime = Date.now();
+    this.storageKey = 'library_telemetry_data';
     
     this.initSession();
     this.setupEventListeners();
     this.startBatchFlush();
+    this.loadStoredData();
+  }
+
+  loadStoredData() {
+    try {
+      const stored = localStorage.getItem(this.storageKey);
+      if (stored) {
+        this.sessionData = JSON.parse(stored);
+      }
+    } catch (error) {
+      console.error('Failed to load stored telemetry data:', error);
+      this.sessionData = [];
+    }
+  }
+
+  saveToStorage() {
+    try {
+      localStorage.setItem(this.storageKey, JSON.stringify(this.sessionData));
+    } catch (error) {
+      console.error('Failed to save telemetry data to storage:', error);
+    }
   }
 
   async initSession() {
     try {
-      const response = await api.post('/api/telemetry/session', {
-        userAgent: navigator.userAgent,
-        referrer: document.referrer,
-        timestamp: new Date().toISOString()
-      });
-
-      if (response.data) {
-        this.sessionId = response.data.sessionId;
-        
-        // Track session start
-        this.track('navigation', 'session', 'session_start', {
-          url: window.location.href,
+      // Generate session ID locally
+      this.sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Try to create session in backend (optional)
+      try {
+        await api.post('/api/telemetry/session', {
+          sessionId: this.sessionId,
           userAgent: navigator.userAgent,
-          viewport: {
-            width: window.innerWidth,
-            height: window.innerHeight
-          }
+          referrer: document.referrer,
+          timestamp: new Date().toISOString()
         });
+      } catch (apiError) {
+        console.log('Backend telemetry unavailable, using offline mode');
       }
+        
+      // Track session start locally
+      this.track('navigation', 'session', 'session_start', {
+        url: window.location.href,
+        userAgent: navigator.userAgent,
+        viewport: {
+          width: window.innerWidth,
+          height: window.innerHeight
+        }
+      });
     } catch (error) {
       console.error('Failed to initialize telemetry session:', error);
     }
@@ -111,10 +139,10 @@ class TelemetryService {
 
     // Track before page unload
     window.addEventListener('beforeunload', () => {
-      this.flush(true); // Force flush before leaving
       this.track('navigation', 'session', 'session_end', {
         duration: Date.now() - this.startTime
       });
+      this.cleanup(); // Export CSV and cleanup
     });
   }
 
@@ -133,6 +161,11 @@ class TelemetryService {
       timestamp: new Date().toISOString()
     };
 
+    // Store locally
+    this.sessionData.push(event);
+    this.saveToStorage();
+
+    // Also add to queue for backend sync (if available)
     this.eventQueue.push(event);
 
     // Flush immediately for critical events
@@ -229,14 +262,128 @@ class TelemetryService {
     this.eventQueue = [];
 
     try {
+      // Try to send to backend (optional)
       for (const event of events) {
-        await api.post('/api/telemetry/event', event);
+        try {
+          await api.post('/api/telemetry/event', event);
+        } catch (apiError) {
+          // Ignore API errors, data is already stored locally
+          console.log('Backend sync failed, continuing with offline mode');
+        }
       }
     } catch (error) {
       console.error('Failed to flush telemetry events:', error);
-      // Put events back in queue for retry
-      this.eventQueue.unshift(...events);
     }
+  }
+
+  // CSV Export functionality
+  exportToCSV(filename = null) {
+    if (this.sessionData.length === 0) {
+      console.log('No telemetry data to export');
+      return;
+    }
+
+    const csvData = this.convertToCSV(this.sessionData);
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename || `telemetry_${this.sessionId}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  convertToCSV(data) {
+    if (data.length === 0) return '';
+
+    // Get all unique keys from the data
+    const headers = new Set();
+    data.forEach(row => {
+      Object.keys(row).forEach(key => {
+        if (key !== 'payload') {
+          headers.add(key);
+        }
+        // Flatten payload if it exists
+        if (key === 'payload' && row[key]) {
+          Object.keys(row[key]).forEach(payloadKey => {
+            headers.add(`payload_${payloadKey}`);
+          });
+        }
+      });
+    });
+
+    const headerArray = Array.from(headers);
+    
+    // Create CSV content
+    let csv = headerArray.join(',') + '\n';
+    
+    data.forEach(row => {
+      const csvRow = headerArray.map(header => {
+        if (header.startsWith('payload_')) {
+          const payloadKey = header.replace('payload_', '');
+          const value = row.payload && row.payload[payloadKey] !== undefined 
+            ? row.payload[payloadKey] 
+            : '';
+          return `"${String(value).replace(/"/g, '""')}"`;
+        } else {
+          const value = row[header] !== undefined ? row[header] : '';
+          return `"${String(value).replace(/"/g, '""')}"`;
+        }
+      });
+      csv += csvRow.join(',') + '\n';
+    });
+
+    return csv;
+  }
+
+  // Get summary statistics
+  getSessionSummary() {
+    const totalEvents = this.sessionData.length;
+    const eventsByCategory = {};
+    const eventsByType = {};
+    const timeRange = {
+      start: null,
+      end: null,
+      duration: 0
+    };
+
+    this.sessionData.forEach(event => {
+      // Count by category
+      eventsByCategory[event.eventCategory] = (eventsByCategory[event.eventCategory] || 0) + 1;
+      
+      // Count by type
+      eventsByType[event.eventType] = (eventsByType[event.eventType] || 0) + 1;
+      
+      // Track time range
+      const eventTime = new Date(event.timestamp);
+      if (!timeRange.start || eventTime < timeRange.start) {
+        timeRange.start = eventTime;
+      }
+      if (!timeRange.end || eventTime > timeRange.end) {
+        timeRange.end = eventTime;
+      }
+    });
+
+    if (timeRange.start && timeRange.end) {
+      timeRange.duration = timeRange.end - timeRange.start;
+    }
+
+    return {
+      totalEvents,
+      eventsByCategory,
+      eventsByType,
+      timeRange,
+      sessionId: this.sessionId
+    };
+  }
+
+  // Clear stored data
+  clearStoredData() {
+    this.sessionData = [];
+    localStorage.removeItem(this.storageKey);
   }
 
   startBatchFlush() {
@@ -257,10 +404,33 @@ class TelemetryService {
   isEnabled() {
     return this.isEnabled;
   }
+
+  // Cleanup method - exports CSV and clears data
+  cleanup() {
+    this.flush(true); // Final flush
+    
+    // Auto-export CSV if we have data
+    if (this.sessionData.length > 0) {
+      console.log('Exporting telemetry data as CSV...');
+      this.exportToCSV();
+      
+      // Show session summary
+      const summary = this.getSessionSummary();
+      console.log('Session Summary:', summary);
+    }
+  }
+
+  // Initialize method for setup
+  init() {
+    // Already initialized in constructor, but can be called explicitly
+    console.log('Telemetry service initialized with offline CSV export');
+    return this;
+  }
 }
 
 // Create global telemetry instance
-const telemetry = new TelemetryService();
+const telemetryService = new TelemetryService();
 
 // Export for use in components
-export default telemetry;
+export { telemetryService };
+export default telemetryService;

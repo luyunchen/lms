@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import TelemetryManager from '../components/TelemetryManager';
+import { telemetryService } from '../services/telemetry';
 
 const TelemetryDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
@@ -10,6 +12,9 @@ const TelemetryDashboard = () => {
   const [refreshInterval, setRefreshInterval] = useState(null);
 
   useEffect(() => {
+    // Track dashboard view
+    telemetryService.trackEvent('page_view', { page: 'telemetry_dashboard' });
+    
     fetchDashboardData();
     fetchEvents();
 
@@ -81,7 +86,7 @@ const TelemetryDashboard = () => {
     <div>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-        <h1>📊 Telemetry Dashboard</h1>
+        <h1>📊 Analytics Dashboard</h1>
         <div className="btn-group">
           <select
             value={timeRange}
@@ -104,32 +109,60 @@ const TelemetryDashboard = () => {
         </div>
       </div>
 
-      {/* Summary Stats */}
+      {/* Offline Telemetry Manager */}
+      <TelemetryManager />
+
+      {/* Backend Analytics (Optional - when server is available) */}
       {dashboardData && (
-        <div className="dashboard">
-          <div className="stat-card">
-            <div className="stat-number stat-total">{formatNumber(dashboardData.totalEvents)}</div>
-            <div className="stat-label">Total Events</div>
-          </div>
-          
-          <div className="stat-card">
-            <div className="stat-number stat-available">{formatNumber(dashboardData.totalSessions)}</div>
-            <div className="stat-label">Sessions</div>
-          </div>
-          
-          <div className="stat-card">
-            <div className="stat-number stat-borrowed">
-              {dashboardData.totalSessions > 0 
-                ? Math.round(dashboardData.totalEvents / dashboardData.totalSessions)
-                : 0}
+        <>
+          <div style={{ 
+            borderTop: '2px solid var(--border-color)', 
+            marginTop: '32px', 
+            paddingTop: '32px' 
+          }}>
+            <h2 style={{ marginBottom: '24px' }}>🌐 Server Analytics</h2>
+            
+            {/* Summary Stats */}
+            <div className="dashboard">
+              <div className="stat-card">
+                <div className="stat-number stat-total">{formatNumber(dashboardData.totalEvents)}</div>
+                <div className="stat-label">Total Events</div>
+              </div>
+              
+              <div className="stat-card">
+                <div className="stat-number stat-available">{formatNumber(dashboardData.totalSessions)}</div>
+                <div className="stat-label">Sessions</div>
+              </div>
+              
+              <div className="stat-card">
+                <div className="stat-number stat-borrowed">
+                  {dashboardData.totalSessions > 0 
+                    ? Math.round(dashboardData.totalEvents / dashboardData.totalSessions)
+                    : 0}
+                </div>
+                <div className="stat-label">Events/Session</div>
+              </div>
+              
+              <div className="stat-card">
+                <div className="stat-number stat-overdue">{dashboardData.errorEvents?.length || 0}</div>
+                <div className="stat-label">Error Events</div>
+              </div>
             </div>
-            <div className="stat-label">Events/Session</div>
           </div>
-          
-          <div className="stat-card">
-            <div className="stat-number stat-overdue">{dashboardData.errorEvents?.length || 0}</div>
-            <div className="stat-label">Error Events</div>
-          </div>
+        </>
+      )}
+
+      {/* Show message if no backend data */}
+      {!dashboardData && !loading && (
+        <div style={{ 
+          borderTop: '2px solid var(--border-color)', 
+          marginTop: '32px', 
+          paddingTop: '32px',
+          textAlign: 'center',
+          color: 'var(--text-secondary)'
+        }}>
+          <h2>🌐 Server Analytics</h2>
+          <p>Backend telemetry server is not available. Using offline mode only.</p>
         </div>
       )}
 

@@ -13,13 +13,6 @@ const AutocompleteSearch = ({
   const inputRef = useRef(null);
   const dropdownRef = useRef(null);
 
-  const fuzzyMatch = useCallback((text, query) => {
-    if (query.length < 3) return false;
-    const distance = levenshteinDistance(text, query);
-    const threshold = Math.floor(query.length * 0.4);
-    return distance <= threshold && distance > 0;
-  }, []);
-
   const levenshteinDistance = useCallback((str1, str2) => {
     const matrix = [];
     
@@ -47,6 +40,13 @@ const AutocompleteSearch = ({
     
     return matrix[str2.length][str1.length];
   }, []);
+
+  const fuzzyMatch = useCallback((text, query) => {
+    if (query.length < 3) return false;
+    const distance = levenshteinDistance(text, query);
+    const threshold = Math.floor(query.length * 0.4);
+    return distance <= threshold && distance > 0;
+  }, [levenshteinDistance]);
 
   const generateFilteredSuggestions = useCallback(() => {
     const query = value.toLowerCase();

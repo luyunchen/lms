@@ -29,17 +29,6 @@ const Books = () => {
   // Message state
   const [message, setMessage] = useState({ text: '', type: '' });
 
-  // Simple fuzzy matching for common typos
-  const fuzzyMatch = useCallback((text, query) => {
-    if (query.length < 3) return false;
-    
-    // Check for character substitutions, insertions, deletions
-    const distance = levenshteinDistance(text, query);
-    const threshold = Math.floor(query.length * 0.3); // Allow 30% error
-    
-    return distance <= threshold && distance > 0;
-  }, []);
-
   // Calculate Levenshtein distance for fuzzy matching
   const levenshteinDistance = useCallback((str1, str2) => {
     const matrix = [];
@@ -68,6 +57,17 @@ const Books = () => {
     
     return matrix[str2.length][str1.length];
   }, []);
+
+  // Simple fuzzy matching for common typos
+  const fuzzyMatch = useCallback((text, query) => {
+    if (query.length < 3) return false;
+    
+    // Check for character substitutions, insertions, deletions
+    const distance = levenshteinDistance(text, query);
+    const threshold = Math.floor(query.length * 0.3); // Allow 30% error
+    
+    return distance <= threshold && distance > 0;
+  }, [levenshteinDistance]);
 
   const fetchBooks = useCallback(async () => {
     try {

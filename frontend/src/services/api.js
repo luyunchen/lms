@@ -1,3 +1,6 @@
+// Axios instance configuration
+import axios from 'axios';
+
 // API configuration
 const getApiUrl = () => {
   // In production on Vercel, use relative URLs to the same domain
@@ -10,9 +13,6 @@ const getApiUrl = () => {
 };
 
 export const API_BASE_URL = getApiUrl();
-
-// Axios instance configuration
-import axios from 'axios';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
